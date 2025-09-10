@@ -46,7 +46,7 @@ The framework combines multiple, complementary estimation methods—each with cl
 - Point and contextual outliers are identified when a value falls outside the beneficiary or cluster-level mean ± 3 σ, with those exact numbers surfaced alongside each alert.
 
 #### 🔹 Isolation Forest
-- An unsupervised tree-ensemble assigns every record an anomaly score (shorter average path → more anomalous).
+- An unsupervised tree-ensemble assigns every record an anomaly score, where a shorter average path indicates a more anomalous record.
 
 #### 🔹 Collective Outlier Detection & SPC
 - We monitor aggregated sums and counts per district or cycle via control-chart bounds and collective-outlier techniques to catch region- or cycle-wide irregularities  
@@ -55,7 +55,7 @@ The framework combines multiple, complementary estimation methods—each with cl
 - KMeans or HDBSCAN groups beneficiaries (or descriptions) by behavior, and geographic/time comparisons highlight when an entire group diverges unexpectedly.
 
 #### 🔹 Fuzzy-Matching Consistency Checks
-- For identity integrity, we apply normalized-string and exact-match checks on names, ID numbers, and phone numbers—with the rapid fuzzy ratio or unique function.
+- For identity integrity, we apply normalized-string and exact-match checks on names, ID numbers, and phone numbers with the rapid fuzzy ratio or unique function.
 
 #### 🔹 Semantic Embedding & Clustering
 - Arabic payment descriptions are embedded via a multilingual transformer and clustered; we then compute cluster mean/std on amounts and flag any description whose z-score or embedding outlier status exceeds the threshold.
