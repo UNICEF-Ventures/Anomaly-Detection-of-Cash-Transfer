@@ -2,8 +2,9 @@
 
 A PoC Web UI dashboard and modular Python package to detect six classes of anomalies in beneficiary payment data and bank reconciliation records, designed for UNICEF–Yemen cash-transfer programs.
 
----
+### 📁Repository Layout
 
+```
 anomaly_dashboard/
 ├── modules/                  	# Individual anomaly‐detection scripts
 │   ├── amount_spike.py       	# Detects abrupt spikes in payment amounts
@@ -15,7 +16,8 @@ anomaly_dashboard/
 ├── app.py                     	# Web UI dashboard that ties together all modules
 ├── requirements.txt           	# Python package dependencies and versions
 ├── .gitignore                 	
-└── README.md                  	
+└── README.md
+```
 
 
 
