@@ -17,6 +17,8 @@ anomaly_dashboard/
 ├── requirements.txt           	# Python package dependencies and versions
 ├── .gitignore                 	
 └── README.md
+├── CONTRIBUTING.md
+└── SECURITY.md
 ```
 
 
