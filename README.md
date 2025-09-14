@@ -1,6 +1,6 @@
 # AI Anomaly Detection for Cash Transfers
 
-A PoC Web UI dashboard and modular Python package to detect six classes of anomalies in beneficiary payment data and bank reconciliation records, designed for UNICEF–Yemen cash-transfer programs.
+A proof-of-concept web dashboard and modular Python package to detect various types of anomalies in beneficiary payment data and reconciliation records, designed for large-scale cash-transfer programs.
 
 ### 📁Repository Layout
 
