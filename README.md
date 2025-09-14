@@ -37,7 +37,7 @@ anomaly_dashboard/
 
 ###  Multi-Method Anomaly Detection Framework
 
-The framework combines multiple, complementary estimation methods—each with clear, human-readable decision criteria to catch a wide range of anomalies while preserving full transparency:
+The framework combines multiple, complementary estimation methods, each with clear, human-readable decision criteria to catch a wide range of anomalies while preserving full transparency:
 
 #### 🔹 Rule-Based Guards
 - Hard thresholds (e.g., “payment > 3 × individual historical average”, “> 3 payments per cycle”) that immediately flag deviations.  
@@ -108,7 +108,6 @@ streamlit run app.py --server.port 8501
 ![Dashboard result 01](web_ui/anom_dashboard_01.png)
 
 ![Dashboard result 02](web_ui/anom_dashboard_02.png)
-
 
 
 
