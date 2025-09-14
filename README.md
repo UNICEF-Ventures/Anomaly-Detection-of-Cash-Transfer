@@ -17,6 +17,8 @@ anomaly_dashboard/
 ├── requirements.txt           	# Python package dependencies and versions
 ├── .gitignore                 	
 └── README.md
+├── docs/
+│   └── Explainable_Deep_Learning_Anomaly_Detection.docx
 ├── CONTRIBUTING.md
 └── SECURITY.md
 ```
@@ -109,5 +111,16 @@ streamlit run app.py --server.port 8501
 
 ![Dashboard result 02](web_ui/anom_dashboard_02.PNG)
 
+
+
+## Additional Documentation
+ 
+The uploaded modular scripts in this repository focus on rule-based, statistical, and ML-based anomaly detection methods.  
+They do **not** include deep learning implementations by default.  
+
+However, we prepared a separate document on **Explainable Deep Learning Models for Anomaly Detection**.  
+This 19-page **technical manuscript (including formal equations and tabular analyses)** serves as an optional resource for contributors or researchers who wish to experiment with deep learning approaches.
+
+- [PDF version](docs/Explainable_Deep_Learning_Anomaly_Detection.pdf)
 
 
