@@ -105,9 +105,9 @@ streamlit run app.py --server.port 8501
 4. Results Table + Download XLSX
 
 
-![Dashboard result 01](web_ui/anom_dashboard_01.png)
+![Dashboard result 01](web_ui/anom_dashboard_01.PNG)
 
-![Dashboard result 02](web_ui/anom_dashboard_02.png)
+![Dashboard result 02](web_ui/anom_dashboard_02.PNG)
 
 
 
