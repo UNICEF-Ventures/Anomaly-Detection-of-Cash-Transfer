@@ -27,7 +27,7 @@ rapidfuzz>=3.13.0
 # Azure Data Lake access
 azure-storage-blob>=12.25.1
 
-# Database connectivity (if PostgreSQL directly directly)
+# Database connectivity (if PostgreSQL is used directly)
 sqlalchemy>=2.0.34
 psycopg2-binary>=2.9.10
 

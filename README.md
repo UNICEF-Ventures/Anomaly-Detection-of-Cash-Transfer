@@ -60,12 +60,6 @@ The framework combines multiple, complementary estimation methods—each with cl
 #### 🔹 Semantic Embedding & Clustering
 - Arabic payment descriptions are embedded via a multilingual transformer and clustered; we then compute cluster mean/std on amounts and flag any description whose z-score or embedding outlier status exceeds the threshold.
 
-### 🔹 Web UI Dashboard
-
-- ADLS integration + optional CSV upload override  
-- Sidebar filters (cycle selection, anomaly type)  
-- Downloadable CSV reports  
-
 ---
 
 ## Installation
@@ -109,3 +103,12 @@ streamlit run app.py --server.port 8501
 3. Optional CSV Upload (overrides ADLS for current cycle)
 
 4. Results Table + Download XLSX
+
+
+![Dashboard result 01](web_ui/anom_dashboard_01.png)
+
+![Dashboard result 02](web_ui/anom_dashboard_02.png)
+
+
+
+
