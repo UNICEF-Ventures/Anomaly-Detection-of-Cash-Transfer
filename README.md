@@ -121,6 +121,6 @@ They do **not** include deep learning implementations by default.
 However, we prepared a separate document on **Explainable Deep Learning Models for Anomaly Detection**.  
 This 19-page **technical manuscript (including formal equations and tabular analyses)** serves as an optional resource for contributors or researchers who wish to experiment with deep learning approaches.
 
-- [PDF version](docs/Explainable_Deep_Learning_Anomaly_Detection.pdf)
+- [Explainable Deep Learning Models for Anomaly Detection - PDF version](docs/Explainable_Deep_Learning_models_Anomaly_Detection.pdf)
 
 
