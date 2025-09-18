@@ -13,11 +13,11 @@ Anomaly-Detection-of-Cash-Transfer/
 │
 anomaly_dashboard/
 ├── modules/                  	# Individual anomaly‐detection scripts
+│   ├── ad_combined.py       	# Combines all anomalies into one module
 │   ├── amount_spike.py       	# Detects abrupt spikes in payment amounts
 │   ├── freq_surge.py         	# Flags beneficiaries with sudden payment‐frequency jumps
 │   ├── district_surge.py     	# Identifies district/site‐level surges in total disbursements
-│   ├── cycle_irregularity.py 	# Finds irregularities in per‐cycle totals and counts
-│   ├── id_integrity.py       	# Checks consistency of beneficiary IDs, names, and phones
+│   ├── id_integrity.py       	# Checks consistency of beneficiary IDs, names, and phones (not yet updated)
 │   └── desc_inconsistency.py 	# Detects anomalous or mislabeled payment descriptions
 ├── app.py                     	# Web UI dashboard that ties together all modules
 ├── requirements.txt           	# Python package dependencies and versions
@@ -74,8 +74,9 @@ The framework combines multiple, complementary estimation methods, each with cle
 
 1. **Clone the repo**  
    ```bash
-   git clone https://github.com/UNICEF-Ventures/Anomaly-Detection-of-Cash-Transfer.git anomaly_dashboard
-   cd anomaly_dashboard
+   git clone https://github.com/UNICEF-Ventures/Anomaly-Detection-of-Cash-Transfer.git
+   cd Anomaly-Detection-of-Cash-Transfer
+
 
 2. Create & activate a conda env
 
@@ -97,6 +98,7 @@ The framework combines multiple, complementary estimation methods, each with cle
 
 ```bash
 Run the Streamlit app:
+cd anomaly_dashboard
 streamlit run app.py --server.port 8501
 ```
 
