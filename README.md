@@ -82,6 +82,9 @@ The framework combines multiple, complementary estimation methods, each with cle
 
    ```bash
    conda create -n anomaly_dashboard python=3.9
+   ```
+
+   ```bash
    conda activate anomaly_dashboard
    ```
 
@@ -89,15 +92,18 @@ The framework combines multiple, complementary estimation methods, each with cle
 
    ```bash
    pip install --upgrade pip
+   ```
+
+   ```bash
    pip install -r requirements.txt
    ```
 
 
 
 ## Usage
+Run the Streamlit app:
 
 ```bash
-Run the Streamlit app:
 cd anomaly_dashboard
 streamlit run app.py --server.port 8501
 ```
