@@ -5,6 +5,12 @@ A proof-of-concept web dashboard and modular Python package to detect various ty
 ### 📁Repository Layout
 
 ```
+
+Anomaly-Detection-of-Cash-Transfer/
+│
+├── generate.py
+├── synthetic_cash_transfer_data.csv   # generated simulated data by default
+│
 anomaly_dashboard/
 ├── modules/                  	# Individual anomaly‐detection scripts
 │   ├── amount_spike.py       	# Detects abrupt spikes in payment amounts
@@ -114,7 +120,7 @@ streamlit run app.py --server.port 8501
 
 
 ## Additional Documentation
- 
+
 The uploaded modular scripts in this repository focus on rule-based, statistical, and ML-based anomaly detection methods.  
 They do **not** include deep learning implementations by default.  
 
@@ -122,5 +128,4 @@ However, we prepared a separate document on **Explainable Deep Learning Models f
 This 19-page **technical manuscript (including formal equations and tabular analyses)** serves as an optional resource for contributors or researchers who wish to experiment with deep learning approaches.
 
 - [Explainable Deep Learning Models for Anomaly Detection - PDF version](docs/Explainable_Deep_Learning_models_Anomaly_Detection.pdf)
-
 

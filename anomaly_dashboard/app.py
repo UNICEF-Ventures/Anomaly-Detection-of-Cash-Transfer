@@ -3,7 +3,6 @@
 import os
 import streamlit as st
 import pandas as pd
-from azure.storage.blob import BlobServiceClient
 from io import StringIO
 import re
 from rapidfuzz import fuzz
@@ -14,7 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import normalize
 from sklearn.ensemble import IsolationForest
 
-from modules.llm_explainer import explain_record  # assuming you saved the module
+from modules.llm_explainer import explain_record 
 import torch
 
 from huggingface_hub import InferenceClient
@@ -29,6 +28,50 @@ from modules.ad_combined import run_ad_combined
 #from modules.desc_inconsistency import run_desc_inconsistency
 
 
+# ----------------------------------
+# LOADING THE generate.py + DATA
+# ---------------------------------
+
+import sys
+from pathlib import Path
+import importlib.util
+
+# Path setup
+REPO_ROOT = Path(__file__).resolve().parents[1] 
+DATA_CSV = REPO_ROOT / "synthetic_cash_transfer_data.csv"
+GEN_PY = REPO_ROOT / "generate.py"
+
+
+def _import_generate_module():
+    """Dynamically import generate.py if present."""
+    if not GEN_PY.exists():
+        return None
+    spec = importlib.util.spec_from_file_location("generate_module", GEN_PY)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+@st.cache_data
+def load_bz_data():
+    """
+    Load beneficiary history data for the dashboard.
+    - It will load If CSV already exists
+    - If CSV is missing, it will autogenerate using generate.py
+    """
+    if not DATA_CSV.exists():
+        gen = _import_generate_module()
+        if gen is None:
+            st.error("generate.py not found in repo root; cannot generate dataset.")
+            return pd.DataFrame()
+        # Generate synthetic dataset
+        bz_df = gen.generate(
+            beneficiaries=10_000, seed=42, locale="ar_SA",
+            min_cycles=2, max_cycles=5, base_amount_noise=0.20
+        )
+        bz_df.to_csv(DATA_CSV, index=False, encoding="utf-8-sig")
+        
+    bz_df = pd.read_csv(DATA_CSV, encoding="utf-8-sig")
+    return bz_df
 
 # ----------------------------------
 # COMPUTE ANOMALIES
@@ -44,7 +87,6 @@ def compute_all(tx_df: pd.DataFrame, bz_df: pd.DataFrame) -> dict:
       #"Cycle Irregularity": run_cycle_irregularity(bz_df),
     }
 
-#__________________________________________________________________________________________________
 
 #___________________________________________________________________________________________________
 
@@ -107,7 +149,6 @@ if uploaded_bz:
             'activty_duration',
             'id_number',
             'phone_number',
-            'payment_order',
             'payment_cycle'
         ]
         missing = set(keep_cols) - set(uploaded_df.columns)
