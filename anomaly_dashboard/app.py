@@ -55,7 +55,7 @@ def _import_generate_module():
 def load_bz_data():
     """
     Load beneficiary history data for the dashboard.
-    - It will load If CSV already exists
+    - It will load if CSV already exists
     - If CSV is missing, it will autogenerate using generate.py
     """
     if not DATA_CSV.exists():
@@ -225,8 +225,8 @@ anoms = df[df['combined_anomaly']].copy()
 
 st.markdown("## Explainability")
 
-# let user pick a single flagged row to explain
-# assuming `anoms` is your dataframe of flagged anomalies
+# This will allow user pick a single flagged row to explain
+# assuming `anoms` is our dataframe of flagged anomalies
 if not anoms.empty:
     idx = st.selectbox("Pick anomaly to explain", anoms.index.tolist())
     record = anoms.loc[idx].to_dict()
