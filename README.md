@@ -88,8 +88,11 @@ The framework combines multiple, complementary estimation methods, each with cle
 3. Install dependencies
 
    ```bash
-   pip install --upgrade pip
-   pip install -r requirements.txt
+   Upgrade and install pip safely within the same Python environment   
+   
+   python -m pip install --upgrade pip
+
+   python -m pip install -r requirements.txt
    ```
 
 
@@ -99,7 +102,7 @@ The framework combines multiple, complementary estimation methods, each with cle
 ```bash
 Run the Streamlit app:
 cd anomaly_dashboard
-streamlit run app.py --server.port 8501
+python -m streamlit run app.py --server.port 8501
 ```
 
 

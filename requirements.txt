@@ -1,34 +1,25 @@
+# Core data & web framework
 streamlit
 pandas
 numpy
-azure-storage-blob
-sqlalchemy
-scikit-learn
-sentence-transformers
-rapidfuzz
-
-
-# Core data & web framework
-streamlit>=1.37.1
-pandas>=2.2.2
-numpy>=1.26.4
 
 # Machine learning
-scikit-learn>=1.5.1
+scikit-learn
+hdbscan
 
 # Text embeddings & NLP
-sentence-transformers>=4.1.0
-# torch>=2.7.0
-# transformers>=4.51.3
+sentence-transformers
+torch
+transformers
 
 # Fuzzy matching
-rapidfuzz>=3.13.0
+rapidfuzz
 
 # Azure Data Lake access
-azure-storage-blob>=12.25.1
+azure-storage-blob
 
 # Database connectivity (if PostgreSQL is used directly)
-sqlalchemy>=2.0.34
-psycopg2-binary>=2.9.10
+sqlalchemy
+psycopg2-binary
 
-Faker>=20.0.0
+Faker
