@@ -16,7 +16,7 @@ from sklearn.ensemble import IsolationForest
 
 import torch
 
-from streamlit_chat import message as chat_message
+#from streamlit_chat import message as chat_message
 
 from modules.ad_combined import run_ad_combined
 #from modules.amount_spike import run_amount_spike
@@ -76,7 +76,8 @@ def load_bz_data():
 # COMPUTE ANOMALIES
 # ---------------------------------
 @st.cache_data
-def compute_all(tx_df: pd.DataFrame, bz_df: pd.DataFrame) -> dict:
+def compute_all(bz_df: pd.DataFrame) -> dict:
+#def compute_all(tx_df: pd.DataFrame, bz_df: pd.DataFrame) -> dict:
 # def compute_all(tx_df, bz_df):
     return {
       "AD Combined 1.0":    run_ad_combined(bz_df),
@@ -97,7 +98,7 @@ def compute_all(tx_df: pd.DataFrame, bz_df: pd.DataFrame) -> dict:
 
 st.markdown("<h1 style='text-align: center;'>UNICEF YSC AI - Anomaly Detection Center</h1>", unsafe_allow_html=True)
 
-hist_tx = load_tx_data()
+#hist_tx = load_tx_data()
 hist_bz = load_bz_data()
 
 
@@ -168,7 +169,7 @@ if uploaded_bz:
 # --------------------------------
 # WEB UI APP - COMPUTE ANOMALIES
 # --------------------------------
-results = compute_all(hist_tx, hist_bz)
+results = compute_all(hist_bz)
 
 # Select anomaly type
 choice = st.sidebar.selectbox("Anomaly Type", list(results.keys()))
