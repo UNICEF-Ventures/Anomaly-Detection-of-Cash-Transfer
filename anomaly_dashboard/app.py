@@ -13,10 +13,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import normalize
 from sklearn.ensemble import IsolationForest
 
-from modules.llm_explainer import explain_record 
+
 import torch
 
-from huggingface_hub import InferenceClient
 from streamlit_chat import message as chat_message
 
 from modules.ad_combined import run_ad_combined
@@ -216,26 +215,4 @@ st.download_button("Download CSV", csv, file_name=f"{choice}.csv")
 # Print results to excel xlsx
 #csv = df.to_excel(index=False).encode("utf-8")
 #st.download_button("Download XLSX", data=csv, file_name=f"{choice}.xlsx")
-
-
-#Explanation MODEL
-#______________________________________________________________________________
-
-anoms = df[df['combined_anomaly']].copy()
-
-st.markdown("## Explainability")
-
-# This will allow user pick a single flagged row to explain
-# assuming `anoms` is our dataframe of flagged anomalies
-if not anoms.empty:
-    idx = st.selectbox("Pick anomaly to explain", anoms.index.tolist())
-    record = anoms.loc[idx].to_dict()
-    explanation_obj = explain_record(record)
-
-    st.subheader("Flagged for Review: Here’s Why")
-    st.write(explanation_obj["explanation"])
-
-    st.subheader("Suggested Next Steps")
-    for step in explanation_obj["next_steps"]:
-        st.write(f"- {step}")
 
