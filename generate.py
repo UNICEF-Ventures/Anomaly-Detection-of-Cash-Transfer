@@ -7,15 +7,17 @@ Schema per row:
 - verification_code   (beneficiary ID, 10-digit string, reused across cycles)
 - beneficiary_names   (Arabic first + last name)
 - payment_amount      (2,000 to 2,000,000)
-- activity_description (Arabic "<category> - <sub>.")
+- activity_desc       (Arabic "<category> - <sub>.")
 - activty_duration    (short Arabic time phrase)
 - id_number           (7-digit string, per beneficiary)
 - phone_number        (9-digit string, per beneficiary)
 - payment_cycle       (integer 1..100)
 
-An extra helper column is added:
-- anomaly_type        ("normal", "amount_spike", "frequency_surge", "inconsistent_description")
-  You can drop this column before running the model if you want.
+Anomalies (not labeled in output; only simulated):
+- amount_spike
+- frequency_surge
+- inconsistent_description
+- amount_service_mismatch
 """
 
 import argparse
@@ -50,7 +52,7 @@ def build_activity_catalog():
     ]
 
 
-def random_activity_description(activity_catalog):
+def random_activity_desc(activity_catalog):
     category, sublist = random.choice(activity_catalog)
     sub = random.choice(sublist)
     return f"{category} - {sub}."
@@ -68,25 +70,32 @@ def arabic_full_name(fake):
 
 def inject_anomalies(df, min_rate=0.05, max_rate=0.10, seed=123):
     """
-    Inject three anomaly types per payment cycle:
+    Inject four anomaly types per payment cycle:
 
-    - amount_spike:
-        payment_amount is strongly above/below beneficiary's historical mean (≈3x+ or 0.1–0.3x).
-    - inconsistent_description:
-        activity_description replaced with generic mismatching phrases.
-    - frequency_surge:
-        >3 rows for same (verification_code, payment_cycle) by adding extra rows.
+    1. amount_spike:
+       payment_amount is strongly above/below the beneficiary's historical mean.
 
-    Adds a column 'anomaly_type' for inspection.
+    2. frequency_surge:
+       >3 rows for the same (verification_code, payment_cycle) by adding extra rows.
+
+    3. inconsistent_description:
+       activity_desc replaced with mismatching free-text phrases.
+
+    4. amount_service_mismatch:
+       payment_amount far from the typical amount for that service (activity_desc).
+
+    Internally uses a helper column '_anomaly_tag' but drops it before returning.
     """
     rng = np.random.default_rng(seed)
     df = df.copy()
 
-    # Label column
-    df["anomaly_type"] = "normal"
+    # Helper tag column (not returned)
+    df["_anomaly_tag"] = "normal"
 
-    # Per-beneficiary mean for spikes
+    # Per-beneficiary mean for amount_spike
     mean_per_ben = df.groupby("verification_code")["payment_amount"].mean().to_dict()
+    # Per-service mean for amount_service_mismatch
+    mean_per_service = df.groupby("activity_desc")["payment_amount"].mean().to_dict()
 
     # Pool of inconsistent/mismatching Arabic descriptions
     inconsistent_desc_pool = [
@@ -108,93 +117,140 @@ def inject_anomalies(df, min_rate=0.05, max_rate=0.10, seed=123):
 
         # Choose rate between min_rate and max_rate for this cycle
         rate_c = float(rng.uniform(min_rate, max_rate))
-        target_n = max(1, int(round(rate_c * n_c)))
+        target_total = int(round(rate_c * n_c))
 
-        # ---------- Amount Spike ----------
-        n_spike = max(1, target_n // 3)  # about 1/3 of anomalies
-        if n_spike > n_c:
-            n_spike = n_c
-        spike_idx = rng.choice(idx_cycle, size=n_spike, replace=False)
+        # Ensure at least 4 anomalies if we have enough rows (so we can represent 4 types)
+        if n_c >= 4:
+            target_total = max(4, target_total)
+        else:
+            target_total = max(1, target_total)
 
-        for idx in spike_idx:
-            vc = df.at[idx, "verification_code"]
-            base = mean_per_ben.get(vc, df.at[idx, "payment_amount"])
-            if pd.isna(base) or base <= 0:
-                base = max(df.at[idx, "payment_amount"], 2000)
+        # Don’t try to modify more rows than we have
+        target_total = min(target_total, n_c)
 
-            # high or low spike
-            if rng.random() < 0.5:
-                new_amt = base * float(rng.uniform(3.2, 4.0))
-            else:
-                new_amt = base * float(rng.uniform(0.1, 0.3))
-
-            new_amt = int(np.clip(new_amt, 2000, 2_000_000))
-            df.at[idx, "payment_amount"] = new_amt
-            df.at[idx, "anomaly_type"] = "amount_spike"
-
-        remaining = target_n - n_spike
-        if remaining <= 0:
+        if target_total <= 0:
             continue
 
-        # ---------- Inconsistent Description ----------
-        n_desc = max(1, remaining // 2)  # about half of remaining anomalies
-        normal_idx = [i for i in idx_cycle if df.at[i, "anomaly_type"] == "normal"]
-        if n_desc > len(normal_idx):
-            n_desc = len(normal_idx)
-        if n_desc > 0:
-            desc_idx = rng.choice(normal_idx, size=n_desc, replace=False)
+        # Roughly equal anomalies across 4 types in this cycle
+        base_per_type = max(1, target_total // 4)
+        counts = {
+            "amount_spike": base_per_type,
+            "inconsistent_description": base_per_type,
+            "amount_service_mismatch": base_per_type,
+            "frequency_surge": base_per_type,
+        }
+        # Adjust total if rounding left some slack
+        assigned = 4 * base_per_type
+        if assigned > target_total:
+            # Reduce one from frequency_surge if we overshot
+            diff = assigned - target_total
+            counts["frequency_surge"] = max(1, counts["frequency_surge"] - diff)
+        elif assigned < target_total:
+            # Add extra anomalies to frequency_surge if we undershot
+            counts["frequency_surge"] += (target_total - assigned)
+
+        # We only *modify* a subset of rows; frequency_surge will also add new rows
+        normal_idxs = idx_cycle.copy()
+
+        # ---------- 1. Amount Spike ----------
+        k_spike = min(counts["amount_spike"], len(normal_idxs))
+        if k_spike > 0:
+            spike_idx = rng.choice(normal_idxs, size=k_spike, replace=False)
+            for idx in spike_idx:
+                vc = df.at[idx, "verification_code"]
+                base = mean_per_ben.get(vc, df.at[idx, "payment_amount"])
+                if pd.isna(base) or base <= 0:
+                    base = max(df.at[idx, "payment_amount"], 2000)
+
+                # stronger spikes to make them very visible
+                if rng.random() < 0.5:
+                    new_amt = base * float(rng.uniform(3.5, 5.0))  # high spike
+                else:
+                    new_amt = base * float(rng.uniform(0.05, 0.25))  # low spike
+
+                new_amt = int(np.clip(new_amt, 2000, 2_000_000))
+                df.at[idx, "payment_amount"] = new_amt
+                df.at[idx, "_anomaly_tag"] = "amount_spike"
+            normal_idxs = [i for i in normal_idxs if i not in spike_idx]
+
+        # ---------- 2. Inconsistent Description ----------
+        k_desc = min(counts["inconsistent_description"], len(normal_idxs))
+        if k_desc > 0:
+            desc_idx = rng.choice(normal_idxs, size=k_desc, replace=False)
             for idx in desc_idx:
-                df.at[idx, "activity_description"] = rng.choice(inconsistent_desc_pool)
-                df.at[idx, "anomaly_type"] = "inconsistent_description"
+                df.at[idx, "activity_desc"] = rng.choice(inconsistent_desc_pool)
+                df.at[idx, "_anomaly_tag"] = "inconsistent_description"
+            normal_idxs = [i for i in normal_idxs if i not in desc_idx]
 
-        remaining = target_n - n_spike - n_desc
-        if remaining <= 0:
-            continue
+        # ---------- 3. Amount–Service Mismatch ----------
+        k_mismatch = min(counts["amount_service_mismatch"], len(normal_idxs))
+        if k_mismatch > 0:
+            mismatch_idx = rng.choice(normal_idxs, size=k_mismatch, replace=False)
+            for idx in mismatch_idx:
+                desc = df.at[idx, "activity_desc"]
+                svc_mean = mean_per_service.get(desc, df.at[idx, "payment_amount"])
+                if pd.isna(svc_mean) or svc_mean <= 0:
+                    svc_mean = max(df.at[idx, "payment_amount"], 2000)
 
-        # ---------- Frequency Surge ----------
-        # We create extra rows so some beneficiaries have >3 payments in this cycle.
-        n_freq_groups = max(1, remaining // 3)
+                # Make amount clearly off relative to typical service mean
+                if rng.random() < 0.5:
+                    new_amt = svc_mean * float(rng.uniform(3.0, 5.0))   # much higher than normal for this service
+                else:
+                    new_amt = svc_mean * float(rng.uniform(0.05, 0.3))  # much lower than normal for this service
 
-        cycle_df = df.loc[idx_cycle]
-        eligible_codes = (
-            cycle_df[cycle_df["anomaly_type"] == "normal"]["verification_code"].unique()
-        )
-        if len(eligible_codes) == 0:
-            continue
+                new_amt = int(np.clip(new_amt, 2000, 2_000_000))
+                df.at[idx, "payment_amount"] = new_amt
+                df.at[idx, "_anomaly_tag"] = "amount_service_mismatch"
+            normal_idxs = [i for i in normal_idxs if i not in mismatch_idx]
 
-        chosen_codes = rng.choice(
-            eligible_codes,
-            size=min(n_freq_groups, len(eligible_codes)),
-            replace=False,
-        )
+        # ---------- 4. Frequency Surge ----------
+        # We try to create some frequency_surge anomalies by adding extra rows
+        k_freq = counts["frequency_surge"]
+        if k_freq > 0 and len(normal_idxs) > 0:
+            cycle_df = df.loc[idx_cycle]
+            eligible_codes = (
+                cycle_df[cycle_df["_anomaly_tag"] == "normal"]["verification_code"].unique()
+            )
+            if len(eligible_codes) > 0:
+                chosen_codes = rng.choice(
+                    eligible_codes,
+                    size=min(k_freq, len(eligible_codes)),
+                    replace=False,
+                )
+                for vc in chosen_codes:
+                    base_rows = df[
+                        (df["verification_code"] == vc) &
+                        (df["payment_cycle"] == cycle)
+                    ]
+                    if base_rows.empty:
+                        continue
+                    base_row = base_rows.iloc[0].to_dict()
+                    base_idx = base_rows.index[0]
 
-        for vc in chosen_codes:
-            base_rows = df[(df["verification_code"] == vc) &
-                           (df["payment_cycle"] == cycle)]
-            if base_rows.empty:
-                continue
-            base_row = base_rows.iloc[0].to_dict()
+                    # Mark the original row too (group-level anomaly)
+                    if df.at[base_idx, "_anomaly_tag"] == "normal":
+                        df.at[base_idx, "_anomaly_tag"] = "frequency_surge"
 
-            # Mark the original row as frequency_surge too (group-level anomaly)
-            base_idx = base_rows.index[0]
-            if df.at[base_idx, "anomaly_type"] == "normal":
-                df.at[base_idx, "anomaly_type"] = "frequency_surge"
-
-            # Add 3 extra rows for this beneficiary/cycle
-            for _ in range(3):
-                new_row = base_row.copy()
-                amt = new_row["payment_amount"]
-                if pd.isna(amt) or amt <= 0:
-                    amt = mean_per_ben.get(vc, 20_000)
-                new_amt = int(np.clip(amt * float(rng.uniform(0.8, 1.2)),
-                                      2000, 2_000_000))
-                new_row["payment_amount"] = new_amt
-                new_row["anomaly_type"] = "frequency_surge"
-                extra_records.append(new_row)
+                    # Add 3 extra similar rows for this beneficiary/cycle
+                    for _ in range(3):
+                        new_row = base_row.copy()
+                        amt = new_row["payment_amount"]
+                        if pd.isna(amt) or amt <= 0:
+                            amt = mean_per_ben.get(vc, 20_000)
+                        new_amt = int(np.clip(
+                            amt * float(rng.uniform(0.8, 1.2)),
+                            2000,
+                            2_000_000
+                        ))
+                        new_row["payment_amount"] = new_amt
+                        new_row["_anomaly_tag"] = "frequency_surge"
+                        extra_records.append(new_row)
 
     if extra_records:
         df = pd.concat([df, pd.DataFrame(extra_records)], ignore_index=True)
 
+    # Drop helper tag before returning – no labels in final data
+    df.drop(columns=["_anomaly_tag"], inplace=True, errors="ignore")
     return df
 
 
@@ -248,7 +304,7 @@ def generate(
         phone_number = str(phone_numbers[i])
 
         name = arabic_full_name(fake)
-        activity_description = random_activity_description(activity_catalog)
+        activity_desc = random_activity_desc(activity_catalog)
         duration = random.choice(activity_durations)
 
         base_amount = random.randint(2_000, 2_000_000)
@@ -271,7 +327,7 @@ def generate(
                 "verification_code": verification_code,
                 "beneficiary_names": name,
                 "payment_amount": pay,
-                "activity_description": activity_description,
+                "activity_desc": activity_desc,
                 "activty_duration": duration,
                 "id_number": id_number,
                 "phone_number": phone_number,
