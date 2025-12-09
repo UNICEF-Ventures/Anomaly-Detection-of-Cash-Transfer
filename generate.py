@@ -69,23 +69,7 @@ def arabic_full_name(fake):
 # ---------------------------
 
 def inject_anomalies(df, min_rate=0.05, max_rate=0.10, seed=123):
-    """
-    Inject four anomaly types per payment cycle:
-
-    1. amount_spike:
-       payment_amount is strongly above/below the beneficiary's historical mean.
-
-    2. frequency_surge:
-       >3 rows for the same (verification_code, payment_cycle) by adding extra rows.
-
-    3. inconsistent_description:
-       activity_desc replaced with mismatching free-text phrases.
-
-    4. amount_service_mismatch:
-       payment_amount far from the typical amount for that service (activity_desc).
-
-    Internally uses a helper column '_anomaly_tag' but drops it before returning.
-    """
+    
     rng = np.random.default_rng(seed)
     df = df.copy()
 
@@ -119,7 +103,7 @@ def inject_anomalies(df, min_rate=0.05, max_rate=0.10, seed=123):
         rate_c = float(rng.uniform(min_rate, max_rate))
         target_total = int(round(rate_c * n_c))
 
-        # Ensure at least 4 anomalies if we have enough rows (so we can represent 4 types)
+        # Representing all four anomalies
         if n_c >= 4:
             target_total = max(4, target_total)
         else:
@@ -162,7 +146,6 @@ def inject_anomalies(df, min_rate=0.05, max_rate=0.10, seed=123):
                 if pd.isna(base) or base <= 0:
                     base = max(df.at[idx, "payment_amount"], 2000)
 
-                # stronger spikes to make them very visible
                 if rng.random() < 0.5:
                     new_amt = base * float(rng.uniform(3.5, 5.0))  # high spike
                 else:
@@ -309,10 +292,10 @@ def generate(
 
         base_amount = random.randint(2_000, 2_000_000)
 
-        # Draw number of cycles for this beneficiary
+        # Drawing number of cycles for this beneficiary
         n_cycles = int(rng.integers(min_cycles, max_cycles + 1))
 
-        # Ensure we don't exceed cycle 100
+        # 100 cycle used in this demo
         max_start = 101 - n_cycles
         if max_start < 1:
             max_start = 1
