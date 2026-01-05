@@ -33,7 +33,6 @@ def run_ad_combined(bz_df):
                              .diff()
     
     # 4. Normalize Arabic descriptions
-    #def normalize_arabic(text):
     def normalize_arabic(text: str) -> str:
         """
         Normalize Arabic text by removing diacritics and standardizing letters.
