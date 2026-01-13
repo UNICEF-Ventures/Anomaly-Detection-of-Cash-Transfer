@@ -5,3 +5,9 @@
 
 # Python cache files
 __pycache__/
+
+# uv venv
+.venv/
+
+# Ruff cache
+.ruff_cache/

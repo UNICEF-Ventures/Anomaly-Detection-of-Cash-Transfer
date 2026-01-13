@@ -10,7 +10,7 @@ import hdbscan
 from sklearn.preprocessing import normalize
 from sklearn.ensemble import IsolationForest
 
-
+pd.set_option('future.no_silent_downcasting', True)
 
 def run_ad_combined(bz_df):
     # 1. Base DataFrame and type casting
@@ -33,7 +33,6 @@ def run_ad_combined(bz_df):
                              .diff()
     
     # 4. Normalize Arabic descriptions
-    #def normalize_arabic(text):
     def normalize_arabic(text: str) -> str:
         """
         Normalize Arabic text by removing diacritics and standardizing letters.
@@ -130,7 +129,7 @@ def run_ad_combined(bz_df):
     
     # Merge back into main df
     df = df.merge(df_num[['id','iforest_num']], on='id', how='left')
-    df['iforest_num'] = df['iforest_num'].fillna(False)
+    df['iforest_num'] = df['iforest_num'].fillna(False).astype(bool)
     
     # 10. Isolation Forest on embeddings only (straightforward merge)
     iso_emb = IsolationForest(contamination=0.05, random_state=42)
@@ -138,7 +137,7 @@ def run_ad_combined(bz_df):
     
     # Merge back into main df
     df = df.merge(desc_df[['normalized_desc','iforest_emb']], on='normalized_desc', how='left')
-    df['iforest_emb'] = df['iforest_emb'].fillna(False)
+    df['iforest_emb'] = df['iforest_emb'].fillna(False).astype(bool)
     
     # 11. Final combined anomaly flag
     #df['combined_anomaly'] = df['rule_flag'] & df['iforest_num'] | df['iforest_emb']

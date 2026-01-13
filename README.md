@@ -12,15 +12,15 @@ Anomaly-Detection-of-Cash-Transfer/
 ├── synthetic_cash_transfer_data.csv   # generated simulated data by default
 │
 anomaly_dashboard/
-├── modules/                  	# Individual anomaly‐detection scripts
-│   ├── ad_combined.py       	# Combines all anomalies into one module
-│   ├── amount_spike.py       	# Detects abrupt spikes in payment amounts
-│   ├── freq_surge.py         	# Flags beneficiaries with sudden payment‐frequency jumps
-│   ├── district_surge.py     	# Identifies district/site‐level surges in total disbursements
-│   ├── id_integrity.py       	# Checks consistency of beneficiary IDs, names, and phones (not yet updated)
-│   └── desc_inconsistency.py 	# Detects anomalous or mislabeled payment descriptions
-├── app.py                     	# Web UI dashboard that ties together all modules
-├── requirements.txt           	# Python package dependencies and versions
+├── modules/                     # Individual anomaly‐detection scripts
+│   ├── ad_combined.py           # Combines all anomalies into one module
+│   ├── amount_spike.py          # Detects abrupt spikes in payment amounts
+│   ├── freq_surge.py            # Flags beneficiaries with sudden payment‐frequency jumps
+│   ├── district_surge.py        # Identifies district/site‐level surges in total disbursements
+│   ├── id_integrity.py          # Checks consistency of beneficiary IDs, names, and phones (not yet updated)
+│   └── desc_inconsistency.py    # Detects anomalous or mislabeled payment descriptions
+├── app.py                       # Web UI dashboard that ties together all modules
+├── requirements.txt             # Python package dependencies and versions
 ├── .gitignore                 	
 └── README.md
 ├── docs/
