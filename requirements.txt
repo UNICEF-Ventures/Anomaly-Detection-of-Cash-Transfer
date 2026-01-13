@@ -1,25 +1,18 @@
 # Core data & web framework
-streamlit
-pandas
-numpy
+streamlit==1.52.2
+pandas==2.3.3
+numpy==2.4.1
 
 # Machine learning
-scikit-learn
-hdbscan
+scikit-learn==1.8.0
+hdbscan==0.8.41
 
 # Text embeddings & NLP
-sentence-transformers
-torch
-transformers
+sentence-transformers==5.2.0
 
 # Fuzzy matching
-rapidfuzz
+rapidfuzz==3.14.3
 
-# Azure Data Lake access
-azure-storage-blob
-
-# Database connectivity (if PostgreSQL is used directly)
-sqlalchemy
-psycopg2-binary
-
-Faker
+# Testing
+Faker==40.1.0
+pytest==9.0.2
